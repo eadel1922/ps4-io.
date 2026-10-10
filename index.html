@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" manifest="cache.appcache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PlayStation 4 Jailbreak Suite</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin:0; padding:0; min-height:100%;
+    background: linear-gradient(180deg, #00439C 0%, #0070D1 300px, #001F54 100%);
+    color:#d7dee8;
+    font:15px/1.5 "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  }
+  a { color:#4aa3e8; text-decoration:none; }
+  a:hover { color:#8cc8ff; }
+
+  /* ---------- PlayStation-style top bar ---------- */
+  #navbar {
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; gap:14px;
+    padding:10px 18px;
+    background:rgba(0, 28, 80, .82);
+    border-bottom:1px solid #16242f;
+  }
+  #navbar .logo {
+    display:flex; align-items:center; gap:10px;
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-style:italic; font-weight:700; font-size:19px;
+    letter-spacing:.4px; color:#fff;
+  }
+  #navbar nav { margin-left:auto; display:flex; gap:6px; }
+  #navbar nav a {
+    padding:6px 12px; border-radius:20px; color:#9db1c4; font-size:13px;
+  }
+  #navbar nav a[aria-current] {
+    background:linear-gradient(90deg,#0070d1,#00439c); color:#fff; font-weight:600;
+  }
+
+  /* ---------- hero ---------- */
+  #hero { text-align:center; padding:34px 18px 10px; }
+  #hero .biglogo { display:inline-block; margin-bottom:12px; filter:drop-shadow(0 8px 22px rgba(0,112,209,.45)); }
+  #hero .console {
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-style:italic; font-weight:700; font-size:27px; letter-spacing:1px; color:#fff;
+  }
+  #hero .tagline {
+    margin:4px auto 0; max-width:460px; color:#7f93a8; font-size:13px;
+  }
+  #hero .bluebar { display:flex; align-items:center; justify-content:center; gap:24px;
+    max-width:520px; margin:22px auto 0; }
+  #hero .bluebar .chip {
+    display:flex; align-items:center; gap:8px; font-size:12px; color:#b6c6d6;
+  }
+  #hero .bluebar .chip svg { display:block; }
+
+  /* ---------- Sony hero wallpaper + console (أزرق) ---------- */
+  #hero .heroimg {
+    display:block; width:100%; max-width:760px; height:auto;
+    margin:14px auto 4px; border-radius:16px;
+    border:1px solid rgba(255,255,255,.28);
+    box-shadow:0 18px 50px rgba(0,10,50,.55);
+  }
+  #hero .conimg {
+    display:block; width:min(300px,72vw); height:auto; margin:6px auto 0;
+    border-radius:14px; border:1px solid rgba(255,255,255,.22);
+    box-shadow:0 12px 34px rgba(0,10,50,.45);
+  }
+
+  /* ---------- status card ---------- */
+  #card {
+    max-width:540px; margin:26px auto 0; padding:0 18px;
+  }
+  .card-inner {
+    position:relative; overflow:hidden;
+    background:linear-gradient(180deg,#073489,#05286b);
+    border:1px solid #1b2a38; border-radius:16px;
+    padding:24px 22px 22px;
+  }
+  .card-inner::before {
+    content:""; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,#0070d1,#00a2ff,#00439c);
+  }
+  #state { font-size:21px; font-weight:700; color:#fff; margin:0 0 6px; }
+  #det   { font-size:13px; color:#8ba0b4; margin:0 0 4px; }
+  #det b  { color:#e8eef5; font-weight:600; }
+  #cache { font-size:12px; color:#5c7486; margin:0 0 18px; min-height:14px; }
+  #cache.cacheok { color:#6fd3a0; }
+
+  .ok   { color:#6fd3a0; } .bad { color:#e08a7f; } .warn { color:#e8c07f; }
+
+  #cta {
+    display:block; width:100%;
+    padding:13px 16px; border:0; border-radius:50px; cursor:pointer;
+    background:linear-gradient(90deg,#0070d1,#0058a8);
+    color:#fff; font-family:inherit; font-size:16px; font-weight:700;
+    font-style:italic; letter-spacing:.5px;
+    box-shadow:0 6px 18px rgba(0,112,209,.35);
+  }
+  #cta:active { transform:translateY(1px); box-shadow:0 3px 10px rgba(0,112,209,.3); }
+
+  /* ---------- supported firmware grid ---------- */
+  #fws { max-width:960px; margin:34px auto 0; padding:0 18px 0; }
+  #fws h2 {
+    font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:#6d8297; margin:0 0 12px; text-align:center;
+  }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .fw-card {
+    background:#0d1118; border:1px solid #1b2a38; border-radius:12px;
+    padding:14px 12px; text-align:center;
+  }
+  .fw-card .ver {
+    font-size:18px; font-weight:700; color:#fff; font-style:italic;
+  }
+  .fw-card .st {
+    display:inline-block; margin-top:7px; padding:3px 10px; border-radius:20px;
+    font-size:10.5px; font-weight:700; letter-spacing:.08em;
+  }
+  .st-go    { background:rgba(0,112,209,.16); color:#4aa3e8; border:1px solid rgba(0,112,209,.4); }
+  .st-live  { background:rgba(111,211,160,.12); color:#6fd3a0; border:1px solid rgba(111,211,160,.35); }
+  .st-exp   { background:rgba(232,192,127,.12); color:#e8c07f; border:1px solid rgba(232,192,127,.35); }
+
+  /* ---------- footer ---------- */
+  footer {
+    margin-top:46px; padding:18px; text-align:center;
+    border-top:1px solid #16242f; color:#5c6b7c; font-size:12px;
+  }
+  footer b { color:#9db1c4; font-style:italic; }
+</style>
+</head>
+<body>
+<div id="navbar">
+  <div class="logo">
+    <svg viewBox="0 0 56 56" width="34" height="34" aria-hidden="true">
+      <polygon points="16,6 6,27 26,27" fill="#20E397"/>
+      <circle cx="37" cy="17" r="9.5" fill="#F95459"/>
+      <rect x="6" y="33" width="19" height="19" rx="4" fill="#F77ABB"/>
+      <g stroke="#0096FF" stroke-width="5.5" stroke-linecap="round">
+        <line x1="26.5" y1="33.5" x2="44.5" y2="51.5"/>
+        <line x1="44.5" y1="33.5" x2="26.5" y2="51.5"/>
+      </g>
+    </svg>
+    PS4
+  </div>
+  <nav>
+    <a aria-current="page" href="#">Home</a>
+    <a href="jb.html">Inject</a>
+    <a href="jb.html?log=1">Log</a>
+  </nav>
+</div>
+
+<div id="hero">
+  <div class="biglogo">
+    <svg viewBox="0 0 56 56" width="72" height="72" aria-hidden="true">
+      <polygon points="16,6 6,27 26,27" fill="#20E397"/>
+      <circle cx="37" cy="17" r="9.5" fill="#F95459"/>
+      <rect x="6" y="33" width="19" height="19" rx="4" fill="#F77ABB"/>
+      <g stroke="#0096FF" stroke-width="5.5" stroke-linecap="round">
+        <line x1="26.5" y1="33.5" x2="44.5" y2="51.5"/>
+        <line x1="44.5" y1="33.5" x2="26.5" y2="51.5"/>
+      </g>
+    </svg>
+  </div>
+    <img class="heroimg" src="hero.webp" alt="PlayStation 4 hero wallpaper">
+  <div class="console">PlayStation&nbsp;4</div>
+  <p class="tagline">أداة حقن PS4 — فيرموير 13.02 حتى 14.00 • GoldHEN v2.4b18.12</p>
+  <div class="bluebar">
+    <span class="chip"><svg viewBox="0 0 24 24" width="16" height="16" fill="#4aa3e8"><polygon points="12,4 4,20 20,20"/></svg> 663 WebKit</span>
+    <span class="chip"><svg viewBox="0 0 24 24" width="16" height="16" fill="#4aa3e8"><circle cx="12" cy="12" r="8"/></svg> Kernel Patches</span>
+    <span class="chip"><svg viewBox="0 0 24 24" width="16" height="16" fill="#4aa3e8"><rect x="4" y="4" width="16" height="16" rx="3"/></svg> GoldHEN</span>
+  </div>
+</div>
+
+<img class="conimg" src="console.jpg" alt="PlayStation 4 console">
+<div id="card">
+  <div class="card-inner">
+    <div id="state">detecting firmware...</div>
+    <div id="det"></div>
+    <div id="cache"></div>
+    <button id="cta" type="button">Start Jailbreak</button>
+  </div>
+</div>
+
+<div id="fws">
+  <h2>Supported Firmwares</h2>
+  <div class="grid">
+    <div class="fw-card"><div class="ver">13.02</div><span class="st st-go">PROVEN</span></div>
+    <div class="fw-card"><div class="ver">13.04</div><span class="st st-go">PROVEN</span></div>
+    <div class="fw-card"><div class="ver">13.50</div><span class="st st-go">MEASURED</span></div>
+    <div class="fw-card"><div class="ver">13.52</div><span class="st st-live">LIVE</span></div>
+    <div class="fw-card"><div class="ver">14.00</div><span class="st st-exp">EXPERIMENTAL</span></div>
+  </div>
+</div>
+
+<footer>PlayStation is a trademark of Sony Interactive Entertainment. This is an <b>unofficial</b> jailbreak toolkit for firmware 13.02 – 14.00.</footer>
+
+<script>
+(function () {
+    var stateEl = document.getElementById("state");
+    var detEl = document.getElementById("det");
+    var cacheEl = document.getElementById("cache");
+    function setState(t, c) { stateEl.textContent = t; stateEl.className = c || ""; }
+    function setCache(t, ok) { cacheEl.textContent = t; cacheEl.className = ok ? "cacheok" : ""; }
+    var params = new URLSearchParams(location.search);
+
+    // Firmwares this build has a MEASURED kernel table for. jb.js still runs its
+    // own kernel-table-present gate, so this is UX only -- an unlisted firmware
+    // can still be launched with a tap. KEEP IN SYNC with ps4_offsets.js: add a
+    // fwnum here in the SAME commit that fills that firmware's kernel RVAs.
+    // The PS4 reports its minor as two hex digits in the UA (13.52 -> minor 0x52).
+    var SUPPORTED = { 1302: 1, 1304: 1, 1350: 1, 1352: 1, 1400: 1 }; // all measured on hardware
+
+    var key = null, fwnum = null;
+    var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(navigator.userAgent);
+    if (m) {
+        var ms = parseInt(m[2], 16).toString(16);
+        if (ms.length < 2) ms = "0" + ms;
+        key = m[1] + "." + ms;
+        fwnum = parseInt(m[1], 10) * 100 + parseInt(ms, 10);
+    }
+
+    var forced = params.get("force") === "1";
+    var supported = forced || (fwnum !== null && SUPPORTED[fwnum] === 1);
+    detEl.innerHTML = "Firmware <b>" + (key || "unknown") + "</b>"
+        + (supported ? " &middot; <b>supported</b>"
+                     : " &middot; not in this build's kernel table");
+
+    var target = "jb.html" + location.search;
+    function go() { setState("loading jailbreak...", "warn"); location.replace(target); }
+
+    function waitForTap(msg, action) {
+        setState(msg, "warn");
+        function fire() {
+            window.removeEventListener("click", fire);
+            window.removeEventListener("keydown", fire);
+            action();
+        }
+        window.addEventListener("click", fire);
+        window.addEventListener("keydown", fire);
+    }
+
+    // Off-target consoles are not launched automatically -- one tap still runs
+    // it, so a user-agent quirk on the real 13.52 console can never lock it out.
+    if (!supported) {
+        setState("UNSUPPORTED FIRMWARE", "bad");
+        waitForTap("دعم غير مضمون (" + (key || "unknown") + ") — اضغط X أو انقر للتشغيل على أي حال", go);
+        return;
+    }
+
+    var ac = window.applicationCache;
+    if (!ac || !document.documentElement.hasAttribute("manifest")) {
+        go();
+    } else if (!navigator.onLine) {
+        setCache("offline -- من الذاكرة المؤقتة", true);
+        go();
+    } else if (ac.status === ac.IDLE) {
+        setCache("cached", true);
+        go();
+    } else if (ac.status === ac.UPDATEREADY) {
+        try { ac.swapCache(); } catch (e) {}
+        setCache("update downloaded", true);
+        waitForTap("UPDATE READY — اضغط X أو انقر لإعادة التحميل والتشغيل",
+                   function () { location.reload(); });
+    } else {
+        setCache("checking cache...");
+        ac.addEventListener("downloading",
+            function () { setCache("caching for offline (أول تشغيل)..."); }, false);
+        ac.addEventListener("progress", function (e) {
+            if (e && e.total)
+                setCache("caching " + Math.round((e.loaded / e.total) * 100) + "%");
+        }, false);
+        ac.addEventListener("cached", function () {
+            setCache("cached for offline use", true);
+            waitForTap("CACHED (أول تشغيل) — اضغط X أو انقر للتشغيل", go);
+        }, false);
+        ac.addEventListener("updateready", function () {
+            try { ac.swapCache(); } catch (e) {}
+            setCache("update downloaded", true);
+            waitForTap("UPDATE READY — اضغط X أو انقر لإعادة التحميل والتشغيل",
+                       function () { location.reload(); });
+        }, false);
+        ac.addEventListener("noupdate", function () {
+            setCache("cached -- جاهز بلا اتصال", true);
+            go();
+        }, false);
+        ac.addEventListener("error", function () {
+            setCache("cache unavailable");
+            waitForTap("CACHE FAILED — اضغط X أو انقر للتشغيل على أي حال", go);
+        }, false);
+        ac.addEventListener("obsolete", function () {
+            setCache("cache obsolete");
+            waitForTap("CACHE OBSOLETE — اضغط X أو انقر للتشغيل", go);
+        }, false);
+    }
+})();
+</script>
+</body>
+</html>

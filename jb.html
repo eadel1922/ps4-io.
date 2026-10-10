@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" manifest="cache.appcache">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PlayStation 4 Jailbreak Suite</title>
+    <style>
+      * { box-sizing: border-box; }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: linear-gradient(180deg, #00439C 0%, #0070D1 420px, #001F54 100%);
+        color: #dcecff;
+        font: 15px/1.5 "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+      }
+      a { color: #4aa3e8; text-decoration: none; }
+      a:hover { color: #8cc8ff; }
+
+      #navbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 18px;
+        background: rgba(0, 45, 105, 0.92);
+        border-bottom: 1px solid #16242f;
+      }
+      #navbar .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 19px;
+        letter-spacing: 0.4px;
+        color: #fff;
+      }
+      #navbar nav { margin-left: auto; display: flex; gap: 6px; }
+      #navbar nav a { padding: 6px 12px; border-radius: 20px; color: #9db1c4; font-size: 13px; }
+      #navbar nav a[aria-current] {
+        background: linear-gradient(90deg, #0070d1, #00439c);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      /* running: a spinner under the navbar. jb.js sets body.done / body.fail / body.log. */
+      #spin {
+        position: fixed;
+        top: calc(50% + 20px);
+        left: 50%;
+        width: 46px;
+        height: 46px;
+        margin: -23px 0 0 -23px;
+        border: 4px solid #1b2a38;
+        border-top-color: #00a2ff;
+        border-right-color: #0070d1;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      #msg {
+        position: fixed;
+        top: 62%;
+        left: 0;
+        right: 0;
+        transform: translateY(-50%);
+        text-align: center;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        line-height: 1.7;
+        padding: 0 18px;
+        color: #ffb3a6;
+        text-shadow:0 0 26px rgba(224,138,127,.65), 0 4px 18px rgba(0,0,0,.6);
+        display: none;
+      }
+      #wrap { padding: 0; }
+      #state,
+      #out { display: none; }
+
+      body.done #spin { display: none; }
+      body.fail #spin { display: none; }
+      body.fail #msg { display: block; }
+
+      /* ?log=1 -- the full step log, styled like the landing. */
+      body.log #spin,
+      body.log #msg { display: none; }
+      body.log #wrap { padding: 14px 18px; }
+      body.log #state {
+        display: block;
+        font-size: 21px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 0 8px;
+      }
+      body.log #out {
+        display: block;
+        white-space: pre-wrap;
+        font: 12px/1.45 Consolas, monospace;
+        background: #0d1118;
+        border: 1px solid #1b2a38;
+        border-radius: 8px;
+        padding: 10px 12px;
+        height: calc(100vh - 141px);
+        overflow-y: auto;
+      }
+      .ok, .safe { color: #6fd3a0; }
+      .bad, .danger { color: #e08a7f; }
+      .warn { color: #e8c07f; }
+      code { color: #6fb4ff; }
+    
+      /* ---- الصفحة الثانية: صورة الكونسول + "تم التعديل" ---- */
+      #consoleShot {
+        display:flex; flex-direction:column; align-items:center; gap:14px;
+        width:min(420px,86vw); margin:6px auto 26px;
+      }
+      #consoleShot img {
+        display:block; width:100%; height:auto; border-radius:16px;
+        border:1px solid rgba(255,255,255,.32);
+        box-shadow:0 18px 46px rgba(0,20,60,.55);
+      }
+      #consoleShot .cap {
+        font-size:15px; font-weight:700; letter-spacing:.4px; color:#cfeaff;
+        text-align:center;
+      }
+      body.done #consoleShot .cap {
+        color:#06281a; font-size:26px; font-weight:800; letter-spacing:1px;
+        background:linear-gradient(180deg,#8ff5c0,#5fd795);
+        border:2px solid #d6ffe9;
+        border-radius:999px;
+        padding:10px 26px;
+        margin-top:22px;
+        box-shadow:0 0 30px rgba(127,240,187,.65), 0 10px 26px rgba(0,20,60,.5);
+        text-shadow:none;
+      }
+      /* ---- نفس المكان: console2 أثناء التحميل، ps4_console3 عند النجاح، ps4_console4 عند الفشل ---- */
+      #consoleShot .shot-done, #consoleShot .shot-fail { display:none; }
+      body.done #consoleShot .shot-load, body.done #consoleShot .shot-fail { display:none; }
+      body.done #consoleShot .shot-done {
+        display:block;
+        border:2px solid #7ff0bb;
+        box-shadow:0 0 34px rgba(127,240,187,.55), 0 18px 46px rgba(0,20,60,.55);
+      }
+      body.fail #consoleShot .shot-load, body.fail #consoleShot .shot-done { display:none; }
+      body.fail #consoleShot .shot-fail {
+        display:block;
+        border:2px solid #e08a7f;
+        box-shadow:0 0 34px rgba(224,138,127,.5), 0 18px 46px rgba(0,20,60,.55);
+      }
+      body.fail #consoleShot .cap { display:none; }
+    </style>
+  </head>
+  <body>
+    <div id="navbar">
+      <div class="logo" style="margin-bottom:0">
+        <svg viewBox="0 0 56 56" width="34" height="34" aria-hidden="true">
+          <polygon points="16,6 6,27 26,27" fill="#20E397"/>
+          <circle cx="37" cy="17" r="9.5" fill="#F95459"/>
+          <rect x="6" y="33" width="19" height="19" rx="4" fill="#F77ABB"/>
+          <g stroke="#0096FF" stroke-width="5.5" stroke-linecap="round">
+            <line x1="26.5" y1="33.5" x2="44.5" y2="51.5"/>
+            <line x1="44.5" y1="33.5" x2="26.5" y2="51.5"/>
+          </g>
+        </svg>
+        PS4
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a aria-current="page" href="#">Inject</a>
+        <a href="?log=1">Log</a>
+      </nav>
+    </div>
+    
+    <div id="consoleShot"><img class="shot shot-load" src="console2.jpg" alt="PlayStation 4 — جارٍ التحميل والحقن">
+      <img class="shot shot-done" src="ps4_console3.jpg" alt="PlayStation 4 — تم التحميل والحقن ✓">
+      <img class="shot shot-fail" src="ps4_console4.jpg" alt="PlayStation 4 — فشل التحميل، أعد تشغيل الجهاز">
+      <div class="cap">تم التعديل — تعديل الجهاز الآن مكتمل ✓</div>
+    </div>
+    <div id="spin"></div>
+    <div id="msg">Restart your console — أعد تشغيل جهازك</div>
+    <div id="wrap">
+      <div id="state"></div>
+      <div id="out"></div>
+    </div>
+    <script type="module">
+      import "./jb.js?v=10";
+    </script>
+  </body>
+</html>
